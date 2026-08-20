@@ -38,7 +38,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 
 .input-row {
   display: flex; width: min(567px, 90vw); height: 72px;
-  border-radius: 14px; background: rgba(217,217,217,0.5); position: relative;
+  border-radius: 14px; background: #d9d9d9; position: relative;
   padding: 6px; align-items: center; gap: 0;
 }
 .input-at {
@@ -242,7 +242,15 @@ function go() {
     img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(raw)}&size=346&background=2a2a36&color=7575ff&bold=true`;
   };
 
-  document.getElementById('card-uname').textContent = '@' + raw.toUpperCase();
+  const unameEl = document.getElementById('card-uname');
+  unameEl.textContent = '@' + raw.toUpperCase();
+  // Shrink font to fit pill (max width ~275px to account for 20px padding)
+  let fs = 25.322;
+  unameEl.style.fontSize = fs + 'px';
+  while (unameEl.scrollWidth > 275 && fs > 10) {
+    fs -= 0.5;
+    unameEl.style.fontSize = fs + 'px';
+  }
   showScreen('s-result');
 }
 document.getElementById('make-btn').addEventListener('click', go);
@@ -339,10 +347,18 @@ async function renderCard() {
   ctx.fillText('I APPLIED TO', 35.32, H / 2 - 27.72);
   ctx.fillText('BASE BATCHES 004', 35.32, H / 2 - 27.72 + 29);
 
-  // Username in pill
-  ctx.fillStyle = '#fff'; ctx.font = '25.322px "Base Sans Mono"';
-  ctx.letterSpacing = '1px'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-  ctx.fillText('@' + uname.toUpperCase(), px + 20, py + ph / 2);
+  // Username in pill — shrink font to fit
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+  ctx.letterSpacing = '1px';
+  let ufs = 25.322;
+  const maxPillW = pw - 40; // 20px padding each side
+  const unameText = '@' + uname.toUpperCase();
+  ctx.font = `${ufs}px "Base Sans Mono"`;
+  while (ctx.measureText(unameText).width > maxPillW && ufs > 10) {
+    ufs -= 0.5;
+    ctx.font = `${ufs}px "Base Sans Mono"`;
+  }
+  ctx.fillText(unameText, px + 20, py + ph / 2);
 
   return cv;
 }
